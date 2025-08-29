@@ -291,6 +291,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "5.0.0"
+  flutter_pinelabs:
+    dependency: "direct main"
+    description:
+      name: flutter_pinelabs
+      sha256: "8a6a5a58f541d2a7e85c04ff473745cfdaaead5374b8e66be411b9603284a9c8"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
   flutter_riverpod:
     dependency: "direct main"
     description:

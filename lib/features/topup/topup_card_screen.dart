@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/pine_labs_service.dart';
@@ -70,13 +71,13 @@ class _TopupCardScreenState extends ConsumerState<TopupCardScreen> {
       final billingRefNo = 'TOPUP_${DateTime.now().millisecondsSinceEpoch}';
 
       // Step 1: Process Payment through Pine Labs
-      final paymentResult = await PineLabsService.doTransaction(
-        amount: topupAmount,
+      final ResponseModel paymentResult = await PineLabsService.doTransaction(
+        paymentAmount: topupAmount,
         billingRefNo: billingRefNo,
-        transactionType: AppConstants.cardSaleTransaction,
+        transactionType: PosTransactionType.card,
       );
 
-      if (paymentResult['success'] == true && paymentResult['responseCode'] == '00') {
+  if (paymentResult.response.responseCode == 0) {
         // Step 2: Update card balance
         final currentBalance = (_cardInfo!['balance'] as num).toDouble();
         final newBalance = currentBalance + topupAmount;
@@ -90,7 +91,7 @@ class _TopupCardScreenState extends ConsumerState<TopupCardScreen> {
 
         if (writeResult['success'] == true) {
           // Step 4: Save to backend
-          await _saveTransactionToBackend(cardUid, topupAmount, newBalance, billingRefNo, paymentResult);
+  await _saveTransactionToBackend(cardUid, topupAmount, newBalance, billingRefNo, jsonDecode(paymentResult.rawResponse));
           
           // Step 5: Print receipt
           await _printReceipt(topupAmount, currentBalance, newBalance, cardUid, billingRefNo);
@@ -103,7 +104,7 @@ class _TopupCardScreenState extends ConsumerState<TopupCardScreen> {
         }
       } else {
         setState(() {
-          _errorMessage = 'Payment failed: ${paymentResult['responseMsg'] ?? 'Unknown error'}';
+          _errorMessage = 'Payment failed: ${paymentResult.response.responseMsg}';
         });
       }
     } catch (e) {

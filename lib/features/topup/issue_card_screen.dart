@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/pine_labs_service.dart';
@@ -50,15 +51,15 @@ class _IssueCardScreenState extends ConsumerState<IssueCardScreen> {
       final billingRefNo = '${AppConstants.issueCardPrefix}${DateTime.now().millisecondsSinceEpoch}';
 
       // Step 1: Process Payment based on selected method
-      Map<String, dynamic> paymentResult;
+  ResponseModel paymentResult;
       String paymentMethodName = '';
       
       switch (paymentMethod) {
         case PaymentMethod.card:
           paymentResult = await PineLabsService.doTransaction(
-            amount: amount,
+            paymentAmount: amount,
             billingRefNo: billingRefNo,
-            transactionType: AppConstants.cardSaleTransaction,
+            transactionType: PosTransactionType.card,
           );
           paymentMethodName = 'CARD';
           break;
@@ -78,12 +79,12 @@ class _IssueCardScreenState extends ConsumerState<IssueCardScreen> {
           break;
       }
 
-      if (paymentResult['success'] == true && paymentResult['responseCode'] == '00') {
+  if (paymentResult.response.responseCode == 0) {
         // Step 2: Read card UID after successful payment
-        await _showCardTapDialog(amount, billingRefNo, paymentResult, paymentMethodName);
+  await _showCardTapDialog(amount, billingRefNo, paymentResult, paymentMethodName);
       } else {
         setState(() {
-          _errorMessage = 'Payment failed: ${paymentResult['responseMsg'] ?? 'Unknown error'}';
+          _errorMessage = 'Payment failed: ${paymentResult.response.responseMsg}';
         });
       }
     } catch (e) {
@@ -97,7 +98,7 @@ class _IssueCardScreenState extends ConsumerState<IssueCardScreen> {
     }
   }
 
-  Future<void> _showCardTapDialog(double amount, String billingRefNo, Map<String, dynamic> paymentResult, String paymentMethod) async {
+  Future<void> _showCardTapDialog(double amount, String billingRefNo, ResponseModel paymentResult, String paymentMethod) async {
     showDialog(
       context: context,
       barrierDismissible: false,
@@ -135,7 +136,7 @@ class _IssueCardScreenState extends ConsumerState<IssueCardScreen> {
 
         if (writeResult['success'] == true) {
         // Step 5: Save to backend
-        await _saveCardToBackend(cardUid, amount, billingRefNo, paymentResult, paymentMethod);
+  await _saveCardToBackend(cardUid, amount, billingRefNo, jsonDecode(paymentResult.rawResponse), paymentMethod);
         
         // Step 6: Print receipt
         await _printReceipt(amount, cardUid, billingRefNo, paymentMethod);          Navigator.of(context).pop(); // Close dialog

@@ -130,6 +130,16 @@ class TopupDashboard extends ConsumerWidget {
                       );
                     },
                   ),
+                  _DashboardCard(
+                    title: 'Pine Labs Demo',
+                    subtitle: 'Test POS integration',
+                    icon: Icons.payment,
+                    color: Colors.blue,
+                    onTap: () {
+                      // Navigate to Pine Labs demo
+                      context.push('/pine-labs-demo');
+                    },
+                  ),
                 ],
               ),
             ),

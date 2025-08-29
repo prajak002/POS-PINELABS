@@ -7,6 +7,7 @@ import 'models/transaction.dart';
 import 'models/menu_item_simple.dart';
 import 'router.dart';
 import 'services/auth_service.dart';
+import 'services/pine_labs_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -26,8 +27,9 @@ void main() async {
   await Hive.openBox<CardData>(HiveBoxes.cards);
   await Hive.openBox<MenuItemSimple>(HiveBoxes.menu);
 
-  // Initialize AuthService
+  // Initialize services
   await AuthService.instance.init();
+  await PineLabsService.initialize(); // Initialize Pine Labs with NFC support
 
   runApp(
     const ProviderScope(

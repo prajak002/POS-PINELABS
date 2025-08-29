@@ -287,13 +287,14 @@ class CartBottomSheet extends ConsumerWidget {
 
     try {
       final billingRefNo = 'ORD_${DateTime.now().millisecondsSinceEpoch}';
-      Map<String, dynamic> result;
+  ResponseModel result;
 
       switch (method) {
         case PaymentMethod.card:
           result = await PineLabsService.doTransaction(
-            amount: total,
+            paymentAmount: total,
             billingRefNo: billingRefNo,
+            transactionType: PosTransactionType.card,
           );
           break;
         case PaymentMethod.upi:
@@ -312,7 +313,7 @@ class CartBottomSheet extends ConsumerWidget {
 
       Navigator.pop(context); // Close loading dialog
 
-      if (result['success'] == true) {
+  if (result.response.responseCode == 0) {
         // Clear cart and show success
         ref.read(cartProviderReal.notifier).clearCart();
         
@@ -326,10 +327,10 @@ class CartBottomSheet extends ConsumerWidget {
               children: [
                 Text('Amount: ₹${total.toStringAsFixed(2)}'),
                 Text('Method: ${method.name.toUpperCase()}'),
-                if (result['transactionId'] != null)
-                  Text('Transaction ID: ${result['transactionId']}'),
-                if (result['approvalCode'] != null)
-                  Text('Approval Code: ${result['approvalCode']}'),
+                if (result.detail?.billingRefNo != null)
+                  Text('Transaction ID: ${result.detail?.billingRefNo}'),
+                if (result.detail?.approvalCode != null)
+                  Text('Approval Code: ${result.detail?.approvalCode}'),
               ],
             ),
             actions: [
@@ -344,7 +345,7 @@ class CartBottomSheet extends ConsumerWidget {
           ),
         );
       } else {
-        _showErrorDialog(context, result['responseMsg'] ?? 'Payment failed');
+  _showErrorDialog(context, result.response.responseMsg);
       }
     } catch (e) {
       Navigator.pop(context); // Close loading dialog

@@ -5,6 +5,7 @@ import 'features/auth/auth_provider.dart';
 import 'features/auth/login_screen.dart';
 import 'features/topup/topup_dashboard.dart';
 import 'features/stall/stall_dashboard.dart';
+import 'features/shared/screens/pine_labs_pos_demo.dart';
 
 final routerProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authProvider);
@@ -52,6 +53,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: '/stall-dashboard',
         name: 'stall-dashboard',
         builder: (context, state) => const StallDashboard(),
+      ),
+      GoRoute(
+        path: '/pine-labs-demo',
+        name: 'pine-labs-demo',
+        builder: (context, state) => const PineLabsPosDemo(),
       ),
     ],
     errorBuilder: (context, state) => Scaffold(
